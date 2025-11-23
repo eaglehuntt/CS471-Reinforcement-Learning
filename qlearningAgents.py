@@ -45,7 +45,7 @@ class QLearningAgent(ReinforcementAgent):
     def __init__(self, **args):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
-        self.qValues = util.Counter()
+        self.q_values = util.Counter()
 
     def getQValue(self, state, action):
         """
@@ -53,7 +53,7 @@ class QLearningAgent(ReinforcementAgent):
           Should return 0.0 if we have never seen a state
           or the Q node value otherwise
         """
-        return self.qValues[(state, action)]
+        return self.q_values[(state, action)]
 
     def computeValueFromQValues(self, state):
         """
@@ -62,12 +62,13 @@ class QLearningAgent(ReinforcementAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
-        legalActions = self.getLegalActions(state)
+        legal_actions = self.getLegalActions(state)
         
-        if len(legalActions) == 0:
+        # Compute the maximum Q-value for all legal actions
+        if len(legal_actions) == 0:
             return 0.0
         else:
-            return max([self.getQValue(state, action) for action in legalActions])
+            return max([self.getQValue(state, action) for action in legal_actions])
               
        
     def computeActionFromQValues(self, state):
@@ -76,12 +77,13 @@ class QLearningAgent(ReinforcementAgent):
           are no legal actions, which is the case at the terminal state,
           you should return None.
         """
-        legalActions = self.getLegalActions(state)
+        legal_actions = self.getLegalActions(state)
         
-        if len(legalActions) == 0:
+        # Get the best action to take at a given state
+        if len(legal_actions) == 0:
             return None
         else:
-            return max(legalActions, key=lambda action: self.getQValue(state, action))
+            return max(legal_actions, key=lambda action: self.getQValue(state, action))
         
         
 
@@ -95,14 +97,14 @@ class QLearningAgent(ReinforcementAgent):
           HINT: You might want to use util.flipCoin(prob)
           HINT: To pick randomly from a list, use random.choice(list)
         """
-        legalActions = self.getLegalActions(state)
+        legal_actions = self.getLegalActions(state)
         
-        if len(legalActions) == 0:
+        if len(legal_actions) == 0:
             return None
         
         if util.flipCoin(self.epsilon):
             # Explore: take a random action
-            return random.choice(legalActions)
+            return random.choice(legal_actions)
         else:
             # Exploit: take the best action
             return self.computeActionFromQValues(state)
@@ -115,11 +117,13 @@ class QLearningAgent(ReinforcementAgent):
           NOTE: You should never call this function,
           it will be called on your behalf
         """
-        currentQ = self.getQValue(state, action)
-        nextStateValue = self.computeValueFromQValues(nextState)
+        # Get the current Q-value and next state's value
+        current_q = self.getQValue(state, action)
+        next_state_value = self.computeValueFromQValues(nextState)
 
-        newQ = currentQ + self.alpha * (reward + self.discount * nextStateValue - currentQ)
-        self.qValues[(state, action)] = newQ
+        # Calculate the new Q-value and update it
+        new_q = current_q + self.alpha * (reward + self.discount * next_state_value - current_q)
+        self.q_values[(state, action)] = new_q
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
@@ -178,19 +182,27 @@ class ApproximateQAgent(PacmanQAgent):
           Should return Q(state,action) = w * featureVector
           where * is the dotProduct operator
         """
+
+        # Calculate the approximate Q-value
         features = self.featExtractor.getFeatures(state, action)
-        return self.weights * features
+        approximate_q = self.weights * features
+
+        return approximate_q
 
     def update(self, state, action, nextState, reward: float):
         """
            Should update your weights based on transition
         """
 
-        currentQ = self.getQValue(state, action)
-        nextStateValue = self.computeValueFromQValues(nextState)
-        difference = (reward + self.discount * nextStateValue - currentQ)
+        # Get current Q-values and next state value
+        current_q = self.getQValue(state, action)
+        next_state_value = self.computeValueFromQValues(nextState)
+
+        # Calculate difference
+        difference = (reward + self.discount * next_state_value - current_q)
         features = self.featExtractor.getFeatures(state, action)
 
+        # Iterate over all features and update weights
         for f in features.keys(): 
             self.weights[f] += self.alpha * difference * features[f]
         

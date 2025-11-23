@@ -66,11 +66,11 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
         
         for k in range(self.iterations):
-            # Store old values - we need V_k to compute V_{k+1}
+            # Store old values 
             old_values = self.values.copy()
             
             for state in self.mdp.getStates():
-                # Skip terminal states - they have value 0
+                # Skip terminal states
                 if self.mdp.isTerminal(state):
                     continue
                 
@@ -84,7 +84,7 @@ class ValueIterationAgent(ValueEstimationAgent):
                     # Get all possible next states and their transition probabilities
                     transitions = self.mdp.getTransitionStatesAndProbs(state, action)
                     
-                    # Sum over all possible next states: P(s'|s,a) * (R(s,a,s') + γ * V_k(s'))
+                    # Sum over all possible next states
                     for next_state, prob in transitions:
                         reward = self.mdp.getReward(state, action, next_state)
                         q_value += prob * (reward + self.discount * old_values[next_state])
@@ -112,7 +112,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         # Get all possible next states and their transition probabilities
         transitions = self.mdp.getTransitionStatesAndProbs(state, action)
         
-        # Sum over all possible next states: P(s'|s,a) * (R(s,a,s') + γ * V(s'))
+        # Sum over all possible next states
         for next_state, prob in transitions:
             reward = self.mdp.getReward(state, action, next_state)
             q_value += prob * (reward + self.discount * self.values[next_state])
